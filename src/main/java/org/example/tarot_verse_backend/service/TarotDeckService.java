@@ -21,6 +21,7 @@ public class TarotDeckService {
             - uprightMeaning: ý nghĩa xuôi (tiếng Việt)
             - reversedMeaning: ý nghĩa ngược (tiếng Việt)
             - description: mô tả ngắn gọn (tiếng Việt)
+            - imageUrl: URL ảnh của lá bài (link đến các ảnh tương ứng với tên lá bài và có thể tải được)
             Không giải thích thêm, chỉ trả JSON thuần túy.
         """;
 
