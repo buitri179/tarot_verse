@@ -38,7 +38,7 @@ public class XaiApiClient {
                 "messages", List.of(
                         Map.of("role", "user", "content", prompt)
                 ),
-                "max_tokens", 1000
+                "max_tokens", 32768
         );
 
         return webClient.post()
