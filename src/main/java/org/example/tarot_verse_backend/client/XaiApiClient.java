@@ -34,10 +34,11 @@ public class XaiApiClient {
     // Gọi API X.ai
     public Map<String, Object> sendMessage(String prompt) {
         Map<String, Object> body = Map.of(
-                "model", "grok-beta",
+                "model", "grok-4-0709",
                 "messages", List.of(
                         Map.of("role", "user", "content", prompt)
-                )
+                ),
+                "max_tokens", 1000
         );
 
         return webClient.post()
@@ -52,28 +53,43 @@ public class XaiApiClient {
     public String askTarotExpert(String prompt) {
         Map<String, Object> response = sendMessage(prompt);
 
-        if (response == null || !response.containsKey("choices")) {
-            throw new RuntimeException("Không nhận được phản hồi hợp lệ từ X.ai");
+        System.out.println("=== RESPONSE từ X.ai ===");
+        System.out.println(response);
+
+        if (response == null || !response.containsKey("content")) {
+            throw new RuntimeException("Không nhận được phản hồi hợp lệ từ X.ai: " + response);
         }
 
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-        if (choices.isEmpty()) {
-            throw new RuntimeException("Không có dữ liệu trong phản hồi X.ai");
+        Object contentObj = response.get("content");
+        if (!(contentObj instanceof List<?>)) {
+            throw new RuntimeException("'content' không phải là một List! Thực tế: " + contentObj);
         }
 
-        Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-        String content = (String) message.get("content");
-
-        if (content == null) {
-            throw new RuntimeException("Không tìm thấy nội dung trả về từ assistant");
+        List<?> contentList = (List<?>) contentObj;
+        if (contentList.isEmpty()) {
+            throw new RuntimeException("Không có dữ liệu trong trường 'content'!");
         }
 
-        // Chỉ lấy phần JSON thuần nếu có
-        int startIndex = content.indexOf("[");
-        int endIndex = content.lastIndexOf("]");
-        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
-            content = content.substring(startIndex, endIndex + 1);
+        StringBuilder sb = new StringBuilder();
+        int idx = 0;
+        for (Object itemObj : contentList) {
+            System.out.println("---- Item #" + idx + ": " + itemObj);
+            idx++;
+            if (itemObj instanceof Map) {
+                Map<?, ?> item = (Map<?, ?>) itemObj;
+                if ("text".equals(item.get("type")) && item.get("text") != null) {
+                    sb.append(item.get("text"));
+                }
+            }
         }
+
+        String content = sb.toString();
+        if (content.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy nội dung text trong content từ assistant!");
+        }
+
+        System.out.println("=== Nội dung text trả về từ X.ai: ===");
+        System.out.println(content);
 
         return content.trim();
     }
@@ -82,6 +98,14 @@ public class XaiApiClient {
     public List<TarotCard> askTarotExpertJson(String prompt) {
         try {
             String content = askTarotExpert(prompt);
+
+            // Kiểm tra xem có đúng là mảng JSON không
+            if (!content.startsWith("[") || !content.endsWith("]")) {
+                throw new RuntimeException(
+                        "Kết quả trả về không phải là mảng JSON! Nội dung: " + content
+                );
+            }
+
             return parseDeckJson(content);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi gọi API hoặc parse JSON từ X.ai", e);
