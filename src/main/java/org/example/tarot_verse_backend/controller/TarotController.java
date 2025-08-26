@@ -1,6 +1,7 @@
 package org.example.tarot_verse_backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tarot_verse_backend.dto.TarotReadingResponse; // Thêm import này
 import org.example.tarot_verse_backend.service.ReadingService;
 import org.example.tarot_verse_backend.service.TarotDeckService;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,6 @@ public class TarotController {
     @GetMapping("/deck")
     public Object getDeck() {
         try {
-            // Đảm bảo TarotDeckService.getFullDeck() đã gọi XaiApiClient bên trong
             return Map.of("deck", tarotDeckService.getFullDeck());
         } catch (Exception ex) {
             return Map.of("error", "Không lấy được bộ bài Tarot: " + ex.getMessage());
@@ -29,17 +29,21 @@ public class TarotController {
     @PostMapping("/reading")
     public Object getReading(@RequestBody Map<String, Object> req) {
         try {
-            String result = readingService.getTarotReading(
+            // Thay vì gọi và lưu kết quả dưới dạng String, hãy lưu dưới dạng đối tượng
+            TarotReadingResponse response = readingService.getTarotReading(
                     (String) req.get("name"),
                     (String) req.get("birthDate"),
                     (String) req.get("birthTime"),
                     (String) req.get("gender"),
                     (String) req.get("topic"),
-                    (String) req.get("question"),
                     (List<String>) req.get("cards")
             );
-            return Map.of("result", result);
+
+            // Trả về trực tiếp đối tượng TarotReadingResponse
+            return response;
+
         } catch (Exception ex) {
+            // Trường hợp lỗi, trả về một đối tượng lỗi để frontend dễ xử lý
             return Map.of("error", "Không lấy được kết quả reading: " + ex.getMessage());
         }
     }
