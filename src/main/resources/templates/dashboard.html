@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tarot Verse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .dashboard-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-message {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: block;
+        }
+
+        .user-details {
+            text-align: center;
+        }
+
+        .user-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-email {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .features {
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="header">
+        <div class="logo">🔮 Tarot Verse</div>
+        <h1 class="welcome-message">Chào mừng bạn đến với Tarot Verse!</h1>
+    </div>
+
+    <div class="user-info">
+        <img th:if="${picture}" th:src="${picture}" class="user-avatar" alt="Avatar">
+        <div th:unless="${picture}" class="user-avatar" style="background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 2rem;">👤</div>
+
+        <div class="user-details">
+            <div class="user-name" th:text="${name}">Tên người dùng</div>
+            <div class="user-email" th:text="${email}">email@example.com</div>
+
+            <div class="actions">
+                <a href="#" class="btn btn-primary">Bắt đầu xem Tarot</a>
+                <a href="/logout" class="btn btn-danger">Đăng xuất</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="features">
+        <h3 style="color: #333; margin-bottom: 1rem;">Tính năng có sẵn:</h3>
+
+        <div class="feature-card">
+            <div class="feature-title">✨ Xem bói Tarot</div>
+            <div class="feature-description">Khám phá tương lai qua các lá bài Tarot bí ẩn</div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">📚 Thư viện Tarot</div>
+            <div class="feature-description">Tìm hiểu ý nghĩa của từng lá bài trong bộ Tarot</div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">🔮 Lịch sử xem bói</div>
+            <div class="feature-description">Xem lại các lần xem bói trước đây của bạn</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Có thể thêm JavaScript để tương tác với API
+    console.log('Dashboard loaded successfully');
+
+    // Test API call
+    fetch('/api/user')
+        .then(response => response.json())
+        .then(data => {
+            console.log('User data:', data);
+        })
+        .catch(error => {
+            console.error('Error fetching user data:', error);
+        });
+</script>
+</body>
+</html>
+
