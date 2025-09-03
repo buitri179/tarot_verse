@@ -6,6 +6,8 @@ import com.example.flutter_admin_tarot_backend.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
@@ -21,9 +23,11 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         String token = authService.login(request.getUsername(), request.getPassword());
         if (token != null) {
-            return ResponseEntity.ok(token);
+            // Trả về JSON thay vì plain string
+            return ResponseEntity.ok(Map.of("token", token));
         } else {
-            return ResponseEntity.status(401).body("Username or password incorrect");
+            return ResponseEntity.status(401)
+                    .body(Map.of("error", "Username or password incorrect"));
         }
     }
 }
