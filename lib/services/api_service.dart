@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import '../models/tarot_result.dart';
+import '../models/login_request.dart';
+import '../models/login_response.dart';
 
 class ApiService {
   static const String baseUrl = "http://localhost:8080/api";
@@ -38,5 +40,19 @@ class ApiService {
   Future<bool> deleteTarotResult(int id) async {
     final response = await http.delete(Uri.parse("$baseUrl/tarot-results/$id"));
     return response.statusCode == 200;
+  }
+
+  Future<LoginResponse> loginAdmin(LoginRequest request) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/admin/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(request.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      return LoginResponse.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Login failed: ${response.body}');
+    }
   }
 }

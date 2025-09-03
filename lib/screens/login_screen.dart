@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,10 +16,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     setState(() => _loading = true);
-    bool success = await AuthService().login(
-      _usernameController.text,
-      _passwordController.text,
-    );
+    bool success = await Provider.of<AuthProvider>(context, listen: false)
+        .login(_usernameController.text, _passwordController.text);
     setState(() => _loading = false);
 
     if (success && mounted) {
