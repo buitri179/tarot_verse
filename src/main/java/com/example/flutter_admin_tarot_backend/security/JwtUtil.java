@@ -3,49 +3,54 @@ package com.example.flutter_admin_tarot_backend.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.security.Key;
+
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    // Secret phải ít nhất 32 ký tự cho HS256
-    private final String SECRET_KEY = "flutter_admin_tarot_secret_key_32_chars_long!";
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    @Value("${jwt.expiration}")
+    private long expiration; // millis
 
-    private final long EXPIRATION = 1000 * 60 * 60 * 24; // 24 giờ
-
+    // Tạo token
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
+    // Lấy username từ token
     public String extractUsername(String token) {
-        return getClaims(token).getSubject();
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
+    // Kiểm tra token
     public boolean validateToken(String token, String username) {
-        String tokenUsername = extractUsername(token);
-        return (tokenUsername.equals(username) && !isTokenExpired(token));
+        String extractedUsername = extractUsername(token);
+        return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token) {
-        return getClaims(token).getExpiration().before(new Date());
-    }
-
-    private Claims getClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
+        Date expirationDate = Jwts.parser()
+                .setSigningKey(secret)
                 .parseClaimsJws(token)
-                .getBody();
+                .getBody()
+                .getExpiration();
+        return expirationDate.before(new Date());
     }
 }
+
+

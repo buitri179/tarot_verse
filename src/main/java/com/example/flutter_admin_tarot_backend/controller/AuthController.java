@@ -1,9 +1,12 @@
 package com.example.flutter_admin_tarot_backend.controller;
 
-
 import com.example.flutter_admin_tarot_backend.dto.LoginRequest;
-import com.example.flutter_admin_tarot_backend.service.AuthService;
+import com.example.flutter_admin_tarot_backend.security.JwtUtil;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -11,23 +14,29 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
-public class AuthController {
+public class  AuthController {
 
-    private final AuthService authService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        String token = authService.login(request.getUsername(), request.getPassword());
-        if (token != null) {
-            // Trả về JSON thay vì plain string
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtUtil.generateToken(userDetails.getUsername());
+
             return ResponseEntity.ok(Map.of("token", token));
-        } else {
-            return ResponseEntity.status(401)
-                    .body(Map.of("error", "Username or password incorrect"));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password"));
         }
     }
 }
