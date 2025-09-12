@@ -15,7 +15,7 @@ RUN ./mvnw clean package -DskipTests
 
 # 6️⃣ Chạy ứng dụng Spring Boot với port Render cấp
 #    $PORT là biến môi trường Render tự set
-CMD ["sh", "-c", "java -Dserver.port=$PORT -jar target/tarot_verse_backend.jar"]
+CMD ["sh", "-c", "java -Dserver.port=$PORT -jar target/tarot_verse_backend-0.0.1-SNAPSHOT.jar"]
 
 # 7️⃣ Expose port mặc định (Render sẽ override bằng $PORT)
 EXPOSE 8080
