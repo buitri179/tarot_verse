@@ -19,7 +19,13 @@ import java.util.Map;
 public class XaiApiClient {
     private final WebClient webClient;
 
-    public XaiApiClient(@Value("${xai.api.key}") String apiKey) {
+    public XaiApiClient() {
+        String apiKey = System.getenv("XAI_API_KEY"); // lấy key từ environment
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new RuntimeException("XAI_API_KEY chưa được set trong environment!");
+        }
+
         HttpClient httpClient = HttpClient.create()
                 .resolver(DefaultAddressResolverGroup.INSTANCE);
 
@@ -30,7 +36,6 @@ public class XaiApiClient {
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey.trim())
                 .build();
     }
-
     // Gọi API X.ai
     public Map<String, Object> sendMessage(String prompt) {
         Map<String, Object> body = Map.of(
